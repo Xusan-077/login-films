@@ -1,6 +1,7 @@
 let favorite = JSON.parse(localStorage.getItem("favorite")) || [];
+let token = localStorage.getItem("token");
 
-const public = `
+let public = `
   <header class="page-header">
     <div class="container">
       <div class="page-header__inner">
@@ -19,17 +20,26 @@ const public = `
   </section>
 `;
 
-const private = `
+let private = `
   <section class="private">
     <div class="container">
       <div class="private__inner">
         <div class="private__top">
           <h1 class="private__top-title page-title">private</h1>
-          <div class="search-div">
+          <div class="top">
             <form action="#" class="private__form">
               <input placeholder="qidirish" type="text" class="private__input" />
               <button class="private__btn">qidirish</button>
             </form>
+            <button class="burger-btn">
+              <div class="open">
+                <span class="open-span"></span>
+                <span class="open-span"></span>
+                <span class="open-span"></span>
+              </div>
+            </button>
+          </div>
+          <div class="search-div">
             <div class="favorite__show-div">
               <div class="favorite-num"></div>
               <button class="favorite-show private__btn">favorite</button>
@@ -41,6 +51,8 @@ const private = `
       </div>
     </div>
   </section>
+
+  <!-- Modal dialogs -->
   <div class="modal">
     <div class="modal-content">
       <h1 class="modal__title">log out qilishni hohlaysizmi?</h1>
@@ -50,6 +62,7 @@ const private = `
       </div>
     </div>
   </div>
+
   <div class="second-modal">
     <div class="second-modal-content">
       <h1 class="second-modal__title">filmni favoritega saqlashni hohlaysizmi?</h1>
@@ -59,6 +72,7 @@ const private = `
       </div>
     </div>
   </div>
+
   <div class="second-modal-muvaffaqiyatli second-modal">
     <div class="second-modal-content">
       <h1 class="second-modal__title second-modal__title--active">film favoritga muvaffaqiyatli saqlandi</h1>
@@ -67,6 +81,7 @@ const private = `
       </div>
     </div>
   </div>
+
   <div class="second-modal-avval second-modal">
     <div class="second-modal-content">
       <h1 class="second-modal__title second-modal__title--active">film allaqachon favoritga saqlangan</h1>
@@ -78,7 +93,7 @@ const private = `
   </div>
 `;
 
-const favoritepage = `
+let favoritepage = `
   <section class="favoritepage">
     <div class="container">
       <div class="favoritepage__inner">
@@ -95,128 +110,153 @@ const favoritepage = `
   </section>
 `;
 
-let token = localStorage.getItem("token");
-
+// -------------------- MAIN LOGIC --------------------
 if (token) {
   document.body.innerHTML = private;
   initializePrivatePage();
-} else {
-  document.body.innerHTML = public;
-}
 
-function initializePrivatePage() {
-  let elform = document.querySelector(".private__form");
-  let elinput = document.querySelector(".private__input");
-  let ellist = document.querySelector(".page__list");
-  let elmodal = document.querySelector(".modal");
-  let ellogout = document.querySelector(".log-out");
-  let favoriteshow = document.querySelector(".favorite-show");
+  // -------------------- FUNCTIONS --------------------
+  function initializePrivatePage() {
+    let elform = document.querySelector(".private__form");
+    let elinput = document.querySelector(".private__input");
+    let ellist = document.querySelector(".page__list");
+    let elmodal = document.querySelector(".modal");
+    let ellogout = document.querySelector(".log-out");
+    let favoriteshow = document.querySelector(".favorite-show");
+    let elburger = document.querySelector(".burger-btn");
 
-  updateFavoriteUI();
-  ellist.innerHTML = `<h1 class="list-title">filimni qidiring!</h1>`;
+    updateFavoriteUI();
+    ellist.innerHTML = `<h1 class="list-title">Filimni qidiring!</h1>`;
 
-  elform.onsubmit = (evt) => {
-    evt.preventDefault();
-    ellist.innerHTML = '<h1 class="list-title">loading...</h1>';
-    render(elinput.value.trim());
-    elinput.value = "";
-  };
+    // Submit qidiruv
+    elform.onsubmit = (evt) => {
+      evt.preventDefault();
+      let name = elinput.value.trim();
+      if (name.length === 0) return;
 
-  ellogout.onclick = () => {
-    elmodal.classList.add("block");
-    document.querySelector(".close-btn").onclick = () =>
-      elmodal.classList.remove("block");
-    document.querySelector(".ok-btn").onclick = () => {
-      localStorage.removeItem("token");
-      window.location.reload();
+      ellist.innerHTML = '<h1 class="list-title">loading...</h1>';
+      render(name);
+      elinput.value = "";
     };
-  };
 
-  favoriteshow.onclick = () => {
-    document.body.innerHTML = favoritepage;
-    let elfavoritelist = document.querySelector(".favoritepage__list");
-    let backBtn = document.querySelector(".favoritepage__btn");
-    renderfavoritelist(favorite, elfavoritelist);
-    backBtn.onclick = () => {
-      document.body.innerHTML = private;
-      initializePrivatePage();
+    // Logout
+    ellogout.onclick = () => {
+      elmodal.classList.add("block");
+      document.querySelector(".close-btn").onclick = () =>
+        elmodal.classList.remove("block");
+      document.querySelector(".ok-btn").onclick = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("favorite");
+        window.location.reload();
+      };
     };
-  };
-}
 
-function updateFavoriteUI() {
-  let elfavoritenum = document.querySelector(".favorite-num");
-  if (favorite.length > 0) {
-    elfavoritenum.style.display = "block";
-    elfavoritenum.textContent = favorite.length;
-  } else {
-    elfavoritenum.style.display = "none";
+    // Favorites sahifasiga o'tish
+    favoriteshow.onclick = () => {
+      document.body.innerHTML = favoritepage;
+      let elfavoritelist = document.querySelector(".favoritepage__list");
+      let backBtn = document.querySelector(".favoritepage__btn");
+
+      renderfavoritelist(favorite, elfavoritelist);
+
+      backBtn.onclick = () => {
+        document.body.innerHTML = private;
+        initializePrivatePage();
+      };
+    };
+
+    // Burger menyu toggle
+
+    let elburgerLines = document.querySelectorAll(".burger-btn span");
+
+    let elSearchDiv = document.querySelector(".search-div");
+    let elFavoriteShow = document.querySelector(".favorite-show");
+    let elLogoutBtn = document.querySelector(".log-out");
+
+    elburger.onclick = () => {
+      elSearchDiv.classList.toggle("block");
+      elSearchDiv.classList.toggle("burger-div");
+      elSearchDiv.classList.toggle("burger-search-div");
+      elFavoriteShow.classList.toggle("burger-favorite-show");
+      elLogoutBtn.classList.toggle("burger-log-out");
+
+      elburgerLines.forEach((el) => {
+        el.classList.toggle("close-span");
+        el.classList.toggle("open");
+      });
+    };
   }
-}
 
-async function render(filmname) {
-  let res = await fetch(
-    `https://www.omdbapi.com/?t=${filmname}&apikey=5ab97502`
-  );
-  let data = await res.json();
-  let ellist = document.querySelector(".page__list");
-
-  if (data.Response === "False") {
-    ellist.innerHTML = `<h1 class="list-title red">Bunday film topilmadi!</h1>`;
-    return;
+  function updateFavoriteUI() {
+    let elfavoritenum = document.querySelector(".favorite-num");
+    if (elfavoritenum) {
+      elfavoritenum.textContent = favorite.length;
+    }
   }
 
-  renderlist(data, ellist);
+  async function render(filmname) {
+    try {
+      let res = await fetch(
+        `https://www.omdbapi.com/?t=${filmname}&apikey=5ab97502`
+      );
+      let data = await res.json();
+      let ellist = document.querySelector(".page__list");
 
-  let elModal = document.querySelector(".second-modal");
-  let elSuccessModal = document.querySelector(".second-modal-muvaffaqiyatli");
-  let elAlreadySavedModal = document.querySelector(".second-modal-avval");
-  let elFavoriteBtn = document.querySelector(".favorite-btn");
-  let elSaveBtn = document.querySelector(".second-saqlash-btn");
-  let elFavoriteremove = document.querySelector(".second-ochirish-btn");
-  let elCloseBtn = document.querySelector(".second-yopish-btn");
-  let elSuccessCloseBtn = document.querySelector(".second-yopish-btn--active");
-  let elAlreadySavedCloseBtn = document.querySelector(
-    ".second-yopish-btn-avval"
-  );
+      if (data.Response === "False") {
+        ellist.innerHTML = `<h1 class="list-title red">Bunday film topilmadi!</h1>`;
+        return;
+      }
 
-  elFavoriteBtn.onclick = () => {
-    if (favorite.some((item) => item.Title === data.Title)) {
-      elAlreadySavedModal.classList.add("block");
-    } else {
-      elModal.classList.add("block");
-    }
-  };
-
-  elSaveBtn.onclick = () => {
-    if (!favorite.some((item) => item.Title === data.Title)) {
-      favorite.push(data);
-      localStorage.setItem("favorite", JSON.stringify(favorite));
+      renderlist(data, ellist);
       updateFavoriteUI();
+
+      // Favorite tugma logikasi
+      let elFavoriteBtn = document.querySelector(".favorite-btn");
+      let elModal = document.querySelector(".second-modal");
+      let elSuccessModal = document.querySelector(
+        ".second-modal-muvaffaqiyatli"
+      );
+      let elAlreadySavedModal = document.querySelector(".second-modal-avval");
+
+      elFavoriteBtn.onclick = () => {
+        if (favorite.some((item) => item.Title === data.Title)) {
+          elAlreadySavedModal.classList.add("block");
+        } else {
+          elModal.classList.add("block");
+        }
+      };
+
+      document.querySelector(".second-saqlash-btn").onclick = () => {
+        if (!favorite.some((item) => item.Title === data.Title)) {
+          favorite.push(data);
+          localStorage.setItem("favorite", JSON.stringify(favorite));
+          updateFavoriteUI();
+        }
+        elModal.classList.remove("block");
+        elSuccessModal.classList.add("block");
+      };
+
+      document.querySelector(".second-ochirish-btn").onclick = () => {
+        favorite = favorite.filter((item) => item.Title !== data.Title);
+        localStorage.setItem("favorite", JSON.stringify(favorite));
+        updateFavoriteUI();
+        elAlreadySavedModal.classList.remove("block");
+        alert(`${data.Title} favoritlardan o‘chirildi!`);
+      };
+
+      document.querySelector(".second-yopish-btn").onclick = () =>
+        elModal.classList.remove("block");
+      document.querySelector(".second-yopish-btn--active").onclick = () =>
+        elSuccessModal.classList.remove("block");
+      document.querySelector(".second-yopish-btn-avval").onclick = () =>
+        elAlreadySavedModal.classList.remove("block");
+    } catch (error) {
+      console.error("Xatolik:", error);
     }
-    elModal.classList.remove("block");
-    elSuccessModal.classList.add("block");
-  };
+  }
 
-  elFavoriteremove.onclick = () => {
-    let index = favorite.findIndex((item) => item.Title === data.Title);
-    if (index !== -1) {
-      favorite.splice(index, 1);
-      localStorage.setItem("favorite", JSON.stringify(favorite));
-      updateFavoriteUI();
-      elAlreadySavedModal.classList.remove("block");
-      alert(`${data.Title} favoritlardan o‘chirildi!`);
-    }
-  };
-
-  elCloseBtn.onclick = () => elModal.classList.remove("block");
-  elSuccessCloseBtn.onclick = () => elSuccessModal.classList.remove("block");
-  elAlreadySavedCloseBtn.onclick = () =>
-    elAlreadySavedModal.classList.remove("block");
-}
-
-function renderlist(obj, list) {
-  list.innerHTML = `
+  function renderlist(obj, list) {
+    list.innerHTML = `
     <li class="page__item">
       <img src="${obj.Poster}" alt="${obj.Title}" class="page__img" />
       <div class="page__text-div">
@@ -231,13 +271,13 @@ function renderlist(obj, list) {
       </div>
     </li>
   `;
-}
+  }
 
-function renderfavoritelist(array, list) {
-  list.innerHTML = "";
-  array.forEach((el) => {
-    list.innerHTML += `
-      <li class="page__item--active">
+  function renderfavoritelist(array, list) {
+    list.innerHTML = "";
+    array.forEach((el) => {
+      list.innerHTML += `
+      <li class="page__item--active page__item">
         <img src="${el.Poster}" alt="${el.Title}" class="page__img" />
         <div class="page__text-div">
           <h1 class="page__title page__title--active"><span>Title:</span> ${el.Title}</h1>
@@ -247,7 +287,8 @@ function renderfavoritelist(array, list) {
         </div>
       </li>
     `;
-  });
+    });
+  }
+} else {
+  document.body.innerHTML = public;
 }
-
-render("spider-man");
