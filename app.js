@@ -40,6 +40,15 @@ let private = `
             </button>
           </div>
           <div class="search-div">
+          <div class="btn-div">
+          <h1 class="page-title">navbar</h1>
+          <button class="side-close">
+            <span class="close-span"></span>
+            <span class="close-span"></span>
+            <span class="close-span"></span>
+            </button>
+          
+          </div>
             <div class="favorite__show-div">
               <div class="favorite-num"></div>
               <button class="favorite-show private__btn">favorite</button>
@@ -67,8 +76,8 @@ let private = `
     <div class="second-modal-content">
       <h1 class="second-modal__title">filmni favoritega saqlashni hohlaysizmi?</h1>
       <div class="second-modal-rozilik">
+      <button class="second-yopish-btn">yopish</button>
         <button class="second-saqlash-btn">saqlash</button>
-        <button class="second-yopish-btn">yopish</button>
       </div>
     </div>
   </div>
@@ -112,6 +121,7 @@ let favoritepage = `
 
 // -------------------- MAIN LOGIC --------------------
 if (token) {
+  // alert("Siz tizimga kirdingiz!!!");
   document.body.innerHTML = private;
   initializePrivatePage();
 
@@ -165,26 +175,33 @@ if (token) {
       };
     };
 
-    // Burger menyu toggle
-
-    let elburgerLines = document.querySelectorAll(".burger-btn span");
-
     let elSearchDiv = document.querySelector(".search-div");
     let elFavoriteShow = document.querySelector(".favorite-show");
     let elLogoutBtn = document.querySelector(".log-out");
+    let elSideClose = document.querySelector(".side-close");
 
-    elburger.onclick = () => {
-      elSearchDiv.classList.toggle("block");
-      elSearchDiv.classList.toggle("burger-div");
-      elSearchDiv.classList.toggle("burger-search-div");
-      elFavoriteShow.classList.toggle("burger-favorite-show");
-      elLogoutBtn.classList.toggle("burger-log-out");
-
-      elburgerLines.forEach((el) => {
-        el.classList.toggle("close-span");
-        el.classList.toggle("open");
+    if (elburger && elSideClose) {
+      elburger.addEventListener("click", () => {
+        elburger.classList.toggle("none");
+        elSearchDiv.classList.toggle("block");
+        elSearchDiv.classList.toggle("burger-div");
+        elSearchDiv.classList.toggle("burger-search-div");
+        elFavoriteShow.classList.toggle("burger-favorite-show");
+        elLogoutBtn.classList.toggle("burger-log-out");
       });
-    };
+
+      elSideClose.addEventListener("click", () => {
+        elSearchDiv.classList.remove(
+          "block",
+          "burger-div",
+          "burger-search-div"
+        );
+        elburger.classList.toggle("none");
+
+        elFavoriteShow.classList.remove("burger-favorite-show");
+        elLogoutBtn.classList.remove("burger-log-out");
+      });
+    }
   }
 
   function updateFavoriteUI() {

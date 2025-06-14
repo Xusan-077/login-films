@@ -89,6 +89,29 @@ elForm.onsubmit = (evt) => {
   }
 };
 
+let users = [
+  "george.bluth@reqres.in",
+  "janet.weaver@reqres.in",
+  "emma.wong@reqres.in",
+  "eve.holt@reqres.in",
+  "charles.morris@reqres.in",
+  "tracey.ramos@reqres.in",
+];
+let ellist = document.querySelector(".login-list");
+ellist.innerHTML = "";
+users.forEach((el) => {
+  ellist.innerHTML += `
+    <li data-id=${el} class="login-item">${el}</li>
+  `;
+});
+
+ellist.onclick = (evt) => {
+  if (evt.target.classList.contains("login-item")) {
+    elEmail.value = evt.target.dataset.id;
+    console.log("click");
+  }
+};
+
 // george.bluth@reqres.in
 // janet.weaver@reqres.in
 // emma.wong@reqres.in
