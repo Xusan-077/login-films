@@ -490,7 +490,8 @@ input {
   margin-top: 20px;
   display: flex;
   align-items: center;
-  justify-content: start;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-top: 0;
   width: 100%;
 }
