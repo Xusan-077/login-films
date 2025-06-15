@@ -49,10 +49,11 @@ let private = `
             </button>
           
           </div>
-            <div class="favorite__show-div">
-              <div class="favorite-num"></div>
-              <button class="favorite-show private__btn">favorite</button>
-            </div>
+          <div class="favorite__show-div">
+            <div class="favorite-num"></div>
+            <button class="favorite-show private__btn">favorite</button>
+          </div>
+          <button class="history-btn private__btn">history</button>
             <button class="log-out private__btn">log out</button>
           </div>
         </div>
@@ -119,70 +120,201 @@ let favoritepage = `
   </section>
 `;
 
+let History = `
+<section class="historypage">
+  <div class="container">
+    <div class="historypage__inner">
+      <div class="historypage__top">
+        <h1 class="page-title">Qidiruv Tarixi</h1>
+        <button class="historypage__btn private__btn">Privatega qaytish</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="history-table">
+          <div>
+            <div class="history__title">
+              <div class="history__item-title history__item-title--active">№</div>
+              <div class="history__item-title history__item-title--active">film nomi</div>
+              <div class="history__item-title history__item-title--active">Qidirilgan vaqt</div>
+            </div>
+          </div>
+          <ul class="history-list"></ul>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+`;
+
 // -------------------- MAIN LOGIC --------------------
 if (token) {
-  // alert("Siz tizimga kirdingiz!!!");
   document.body.innerHTML = private;
   initializePrivatePage();
 
-  // -------------------- FUNCTIONS --------------------
+  // === PRIVATE PAGE FUNCTIONALITY ===
   function initializePrivatePage() {
-    let elform = document.querySelector(".private__form");
-    let elinput = document.querySelector(".private__input");
-    let ellist = document.querySelector(".page__list");
-    let elmodal = document.querySelector(".modal");
-    let ellogout = document.querySelector(".log-out");
-    let favoriteshow = document.querySelector(".favorite-show");
-    let elburger = document.querySelector(".burger-btn");
+    const elForm = document.querySelector(".private__form");
+    const elInput = document.querySelector(".private__input");
+    const elList = document.querySelector(".page__list");
 
     updateFavoriteUI();
-    ellist.innerHTML = `<h1 class="list-title">Filimni qidiring!</h1>`;
+    elList.innerHTML = `<h1 class="list-title">Filimni qidiring!</h1>`;
 
-    // Submit qidiruv
-    elform.onsubmit = (evt) => {
+    // === SEARCH FUNCTION ===
+    elForm.onsubmit = (evt) => {
       evt.preventDefault();
-      let name = elinput.value.trim();
-      if (name.length === 0) return;
-
-      ellist.innerHTML = '<h1 class="list-title">loading...</h1>';
-      render(name);
-      elinput.value = "";
+      const name = elInput.value.trim();
+      if (name) {
+        elList.innerHTML = '<h1 class="list-title">loading...</h1>';
+        render(name);
+        elInput.value = "";
+      }
     };
 
-    // Logout
-    ellogout.onclick = () => {
-      elmodal.classList.add("block");
+    // === LOGOUT ===
+    logout();
+
+    // === FAVORITE PAGE ===
+    favoriteshow();
+
+    // === HISTORY PAGE ===
+
+    document.addEventListener("keydown", function (event) {
+      if (event.ctrlKey && event.key.toLowerCase() === "h") {
+        event.preventDefault();
+
+        clickhistory();
+      }
+    });
+
+    if (document.querySelector(".history-btn")) {
+      clickhistoryphone();
+    }
+
+    // === BURGER MENU ===
+    burger();
+  }
+
+  // === render other function ===
+  function clickhistory() {
+    document.body.innerHTML = History;
+    const history = JSON.parse(localStorage.getItem("history")) || [];
+
+    const elHistoryList = document.querySelector(".history-list");
+    renderHistory(history, elHistoryList);
+
+    elHistoryList.onclick = (evt) => {
+      function history() {
+        document.querySelector(".history-btn").onclick = () => {
+          document.body.innerHTML = History;
+          const history = JSON.parse(localStorage.getItem("history")) || [];
+
+          const elHistoryList = document.querySelector(".history-list");
+          renderHistory(history, elHistoryList);
+
+          elHistoryList.onclick = (evt) => {
+            if (evt.target.closest(".history__item")) {
+              document.body.innerHTML = private;
+              render(evt.target.closest(".history__item").dataset.id);
+              burger();
+              favoriteshow();
+            }
+          };
+
+          document.querySelector(".historypage__btn").onclick = () => {
+            document.body.innerHTML = private;
+            initializePrivatePage();
+          };
+        };
+      }
+      if (evt.target.closest(".history__item")) {
+        document.body.innerHTML = private;
+        render(evt.target.closest(".history__item").dataset.id);
+        burger();
+        favoriteshow();
+        history();
+        logout();
+      }
+    };
+
+    document.querySelector(".historypage__btn").onclick = () => {
+      document.body.innerHTML = private;
+      initializePrivatePage();
+    };
+  }
+  function clickhistoryphone() {
+    document.querySelector(".history-btn").onclick = () => {
+      document.body.innerHTML = History;
+      const history = JSON.parse(localStorage.getItem("history")) || [];
+
+      const elHistoryList = document.querySelector(".history-list");
+      renderHistory(history, elHistoryList);
+
+      elHistoryList.onclick = (evt) => {
+        function history() {
+          document.querySelector(".history-btn").onclick = () => {
+            document.body.innerHTML = History;
+            const history = JSON.parse(localStorage.getItem("history")) || [];
+
+            const elHistoryList = document.querySelector(".history-list");
+            renderHistory(history, elHistoryList);
+
+            elHistoryList.onclick = (evt) => {
+              if (evt.target.closest(".history__item")) {
+                document.body.innerHTML = private;
+                render(evt.target.closest(".history__item").dataset.id);
+                burger();
+                favoriteshow();
+              }
+            };
+
+            document.querySelector(".historypage__btn").onclick = () => {
+              document.body.innerHTML = private;
+              initializePrivatePage();
+            };
+          };
+        }
+        if (evt.target.closest(".history__item")) {
+          document.body.innerHTML = private;
+          render(evt.target.closest(".history__item").dataset.id);
+          burger();
+          favoriteshow();
+          history();
+          logout();
+        }
+      };
+
+      document.querySelector(".historypage__btn").onclick = () => {
+        document.body.innerHTML = private;
+        initializePrivatePage();
+      };
+    };
+  }
+  function logout() {
+    const elModal = document.querySelector(".modal");
+    const elLogout = document.querySelector(".log-out");
+
+    elLogout.onclick = () => {
+      elModal.classList.add("block");
       document.querySelector(".close-btn").onclick = () =>
-        elmodal.classList.remove("block");
+        elModal.classList.remove("block");
       document.querySelector(".ok-btn").onclick = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("favorite");
         window.location.reload();
       };
     };
+  }
+  function burger() {
+    const elBurger = document.querySelector(".burger-btn");
+    const elFavoriteShow = document.querySelector(".favorite-show");
+    const elSearchDiv = document.querySelector(".search-div");
+    const elLogoutBtn = document.querySelector(".log-out");
+    const elSideClose = document.querySelector(".side-close");
 
-    // Favorites sahifasiga o'tish
-    favoriteshow.onclick = () => {
-      document.body.innerHTML = favoritepage;
-      let elfavoritelist = document.querySelector(".favoritepage__list");
-      let backBtn = document.querySelector(".favoritepage__btn");
-
-      renderfavoritelist(favorite, elfavoritelist);
-
-      backBtn.onclick = () => {
-        document.body.innerHTML = private;
-        initializePrivatePage();
-      };
-    };
-
-    let elSearchDiv = document.querySelector(".search-div");
-    let elFavoriteShow = document.querySelector(".favorite-show");
-    let elLogoutBtn = document.querySelector(".log-out");
-    let elSideClose = document.querySelector(".side-close");
-
-    if (elburger && elSideClose) {
-      elburger.addEventListener("click", () => {
-        elburger.classList.toggle("none");
+    if (elBurger && elSideClose) {
+      elBurger.addEventListener("click", () => {
+        elBurger.classList.toggle("none");
         elSearchDiv.classList.toggle("block");
         elSearchDiv.classList.toggle("burger-div");
         elSearchDiv.classList.toggle("burger-search-div");
@@ -196,113 +328,166 @@ if (token) {
           "burger-div",
           "burger-search-div"
         );
-        elburger.classList.toggle("none");
-
+        elBurger.classList.toggle("none");
         elFavoriteShow.classList.remove("burger-favorite-show");
         elLogoutBtn.classList.remove("burger-log-out");
       });
     }
   }
+  function favoriteshow() {
+    const elFavoriteShow = document.querySelector(".favorite-show");
+    elFavoriteShow.onclick = () => {
+      document.body.innerHTML = favoritepage;
+      const elFavoriteList = document.querySelector(".favoritepage__list");
+      const backBtn = document.querySelector(".favoritepage__btn");
 
-  function updateFavoriteUI() {
-    let elfavoritenum = document.querySelector(".favorite-num");
-    if (elfavoritenum) {
-      elfavoritenum.textContent = favorite.length;
-    }
+      renderFavoriteList(favorite, elFavoriteList);
+
+      backBtn.onclick = () => {
+        document.body.innerHTML = private;
+        initializePrivatePage();
+      };
+    };
   }
 
+  // === RENDER FUNCTION ===
   async function render(filmname) {
-    try {
-      let res = await fetch(
-        `https://www.omdbapi.com/?t=${filmname}&apikey=5ab97502`
-      );
-      let data = await res.json();
-      let ellist = document.querySelector(".page__list");
+    const res = await fetch(
+      `https://www.omdbapi.com/?t=${filmname}&apikey=5ab97502`
+    );
+    const data = await res.json();
+    const elList = document.querySelector(".page__list");
 
-      if (data.Response === "False") {
-        ellist.innerHTML = `<h1 class="list-title red">Bunday film topilmadi!</h1>`;
-        return;
+    if (data.Response === "False") {
+      elList.innerHTML = `<h1 class="list-title red">Bunday film topilmadi!</h1>`;
+      return;
+    }
+
+    // Add to search history\
+
+    let history = JSON.parse(localStorage.getItem("history")) || [];
+    history.push({
+      title: data.Title,
+      time: new Date().toLocaleString(),
+    });
+    localStorage.setItem("history", JSON.stringify(history));
+
+    renderList(data, elList);
+    updateFavoriteUI();
+    setupFavoriteLogic(data);
+  }
+
+  // === FAVORITE BUTTON LOGIC ===
+  function setupFavoriteLogic(data) {
+    const elFavoriteBtn = document.querySelector(".favorite-btn");
+    const elModal = document.querySelector(".second-modal");
+    const elSuccessModal = document.querySelector(
+      ".second-modal-muvaffaqiyatli"
+    );
+    const elAlreadySavedModal = document.querySelector(".second-modal-avval");
+
+    elFavoriteBtn.onclick = () => {
+      if (favorite.some((item) => item.Title === data.Title)) {
+        elAlreadySavedModal.classList.add("block");
+      } else {
+        elModal.classList.add("block");
       }
+    };
 
-      renderlist(data, ellist);
-      updateFavoriteUI();
-
-      // Favorite tugma logikasi
-      let elFavoriteBtn = document.querySelector(".favorite-btn");
-      let elModal = document.querySelector(".second-modal");
-      let elSuccessModal = document.querySelector(
-        ".second-modal-muvaffaqiyatli"
-      );
-      let elAlreadySavedModal = document.querySelector(".second-modal-avval");
-
-      elFavoriteBtn.onclick = () => {
-        if (favorite.some((item) => item.Title === data.Title)) {
-          elAlreadySavedModal.classList.add("block");
-        } else {
-          elModal.classList.add("block");
-        }
-      };
-
-      document.querySelector(".second-saqlash-btn").onclick = () => {
-        if (!favorite.some((item) => item.Title === data.Title)) {
-          favorite.push(data);
-          localStorage.setItem("favorite", JSON.stringify(favorite));
-          updateFavoriteUI();
-        }
-        elModal.classList.remove("block");
-        elSuccessModal.classList.add("block");
-      };
-
-      document.querySelector(".second-ochirish-btn").onclick = () => {
-        favorite = favorite.filter((item) => item.Title !== data.Title);
+    document.querySelector(".second-saqlash-btn").onclick = () => {
+      if (!favorite.some((item) => item.Title === data.Title)) {
+        favorite.push(data);
         localStorage.setItem("favorite", JSON.stringify(favorite));
         updateFavoriteUI();
-        elAlreadySavedModal.classList.remove("block");
-        alert(`${data.Title} favoritlardan o‘chirildi!`);
-      };
+      }
+      elModal.classList.remove("block");
+      elSuccessModal.classList.add("block");
+    };
 
-      document.querySelector(".second-yopish-btn").onclick = () =>
-        elModal.classList.remove("block");
-      document.querySelector(".second-yopish-btn--active").onclick = () =>
-        elSuccessModal.classList.remove("block");
-      document.querySelector(".second-yopish-btn-avval").onclick = () =>
-        elAlreadySavedModal.classList.remove("block");
-    } catch (error) {
-      console.error("Xatolik:", error);
+    document.querySelector(".second-ochirish-btn").onclick = () => {
+      favorite = favorite.filter((item) => item.Title !== data.Title);
+      localStorage.setItem("favorite", JSON.stringify(favorite));
+      updateFavoriteUI();
+      elAlreadySavedModal.classList.remove("block");
+      alert(`${data.Title} favoritlardan o‘chirildi!`);
+    };
+
+    document
+      .querySelectorAll(
+        ".second-yopish-btn, .second-yopish-btn--active, .second-yopish-btn-avval"
+      )
+      .forEach((btn) => {
+        btn.onclick = () => {
+          elModal.classList.remove("block");
+          elSuccessModal.classList.remove("block");
+          elAlreadySavedModal.classList.remove("block");
+        };
+      });
+  }
+
+  // === UPDATE FAVORITE COUNTER ===
+  function updateFavoriteUI() {
+    const elFavoriteNum = document.querySelector(".favorite-num");
+    if (elFavoriteNum) {
+      elFavoriteNum.innerHTML = favorite.length;
     }
   }
 
-  function renderlist(obj, list) {
+  // === RENDER MAIN FILM ITEM ===
+  function renderList(obj, list) {
     list.innerHTML = `
     <li class="page__item">
       <img src="${obj.Poster}" alt="${obj.Title}" class="page__img" />
       <div class="page__text-div">
-        <h1 class="page__title"><span>Title:</span> ${obj.Title}</h1>
-        <h1 class="page__title"><span>Year:</span> ${obj.Year}</h1>
-        <h1 class="page__title"><span>Released:</span> ${obj.Released}</h1>
-        <h1 class="page__title"><span>Writer:</span> ${obj.Writer}</h1>
-        <h1 class="page__title"><span>Language:</span> ${obj.Language}</h1>
-        <h1 class="page__title"><span>Genre:</span> ${obj.Genre}</h1>
-        <p class="page__title page__text"><span>Plot:</span> ${obj.Plot}</p>
+      <div>
+      <h1 class="page__title"><span>Title:</span> ${obj.Title}</h1>
+      <h1 class="page__title"><span>Released:</span> ${obj.Released}</h1>
+      <h1 class="page__title"><span>Writer:</span> ${obj.Writer}</h1>
+      <h1 class="page__title"><span>Language:</span> ${obj.Language}</h1>
+      <h1 class="page__title"><span>Genre:</span> ${obj.Genre}</h1>
+      <p class="page__title page__text"><span>Plot:</span> ${obj.Plot}</p>
+      </div>
         <button class="favorite-btn">favorite ⭐</button>
       </div>
     </li>
   `;
   }
 
-  function renderfavoritelist(array, list) {
-    list.innerHTML = "";
+  // === RENDER FAVORITE LIST ===
+  function renderFavoriteList(array, list) {
     array.forEach((el) => {
       list.innerHTML += `
-      <li class="page__item--active page__item">
-        <img src="${el.Poster}" alt="${el.Title}" class="page__img" />
-        <div class="page__text-div">
-          <h1 class="page__title page__title--active"><span>Title:</span> ${el.Title}</h1>
-          <h1 class="page__title page__title--active"><span>Released:</span> ${el.Released}</h1>
-          <h1 class="page__title page__title--active"><span>Language:</span> ${el.Language}</h1>
-          <h1 class="page__title page__title--active"><span>Genre:</span> ${el.Genre}</h1>
-        </div>
+    <li class="page__item--active page__item">
+      <img src="${el.Poster}" alt="${el.Title}" class="page__img" />
+      <div class="page__text-div">
+        <h1 class="page__title page__title--active"><span>Title:</span> ${el.Title}</h1>
+        <h1 class="page__title page__title--active"><span>Released:</span> ${el.Released}</h1>
+        <h1 class="page__title page__title--active"><span>Language:</span> ${el.Language}</h1>
+        <h1 class="page__title page__title--active"><span>Genre:</span> ${el.Genre}</h1>
+      </div>
+    </li>
+      `;
+    });
+  }
+
+  // === RENDER SEARCH HISTORY ===
+  function renderHistory(array, list) {
+    list.innerHTML = "";
+    array.forEach((el, index) => {
+      list.innerHTML += `
+      <div class="cliskhere">
+      <li data-id=${el.title} class="history__item">
+        <div class="history__item-title"><span class="history__item-span">№: </span>${
+          index + 1
+        }</div>
+        <div class="history__item-title"><span class="history__item-span">film nomi: </span>${
+          el.title
+        }</div>
+        <div class="history__item-title"><span class="history__item-span">Qidrilgan vaqt: </span>${
+          el.time
+        }</div>
       </li>
+      </div>
     `;
     });
   }
